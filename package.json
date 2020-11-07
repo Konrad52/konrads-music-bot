@@ -1,0 +1,16 @@
+{
+  "name": "music-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "Kiss Konrád Soma",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "license": "GNU 3.0",
+  "dependencies": {
+    "discord.js": "^12.4.1",
+    "opusscript": "^0.0.7",
+    "ytdl-core": "^4.0.3"
+  }
+}
