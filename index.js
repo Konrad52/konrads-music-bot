@@ -59,7 +59,7 @@ client.on('message', message => {
             let server = servers[message.guild.id];
             server.queue.push(args[0]);
         
-            if (!message.guild.voice.connection) {
+            if (!message.guild.voice) {
                 message.member.voice.channel.join().then((connection) => {
                     play(connection, server);
                 });
