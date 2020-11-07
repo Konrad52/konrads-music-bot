@@ -20,6 +20,14 @@ client.on('message', message => {
     const command = split[0];
     const args = split.slice(1, split.length);
 
+    if (!servers[message.guild.id]) {
+        servers[message.guild.id] = {
+            queue: [],
+            dispatcher: null
+        }
+    }
+    const server = servers[message.guild.id];
+
     switch (command) {
         case 'play':
             function play(connection, server) {
@@ -49,14 +57,6 @@ client.on('message', message => {
                 return;
             }
 
-            if (!servers[message.guild.id]) {
-                servers[message.guild.id] = {
-                    queue: [],
-                    dispatcher: null
-                }
-            }
-
-            let server = servers[message.guild.id];
             server.queue.push(args[0]);
         
             if (!message.guild.voice) {
@@ -68,6 +68,17 @@ client.on('message', message => {
                 return;
             }
 
+            break;
+        case 'queue':
+            let queueString = '';
+            let id = 1;
+            server.queue.forEach(song => {
+                queueString += id.toString() + '. ' + song + '\n';
+                id++;
+            });            
+            message.channel.send(
+                `\`\`\`python\n${queueString}\`\`\``
+            );
             break;
     }
 });
