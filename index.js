@@ -23,6 +23,7 @@ client.on('message', message => {
     if (!servers[message.guild.id]) {
         servers[message.guild.id] = {
             queue: [],
+            current: '',
             dispatcher: null
         }
     }
@@ -32,12 +33,14 @@ client.on('message', message => {
         case 'play':
             function play(connection, server) {
                 server.dispatcher = connection.play(ytdl(server.queue[0], {quality: 'highestaudio', filter: 'audioonly'}));
+                server.current = server.queue[0];
                 server.queue.shift();
                 server.dispatcher.on('end', () => {
                     if (server.queue[0]) {
                         play(connection, server);
                     } else {
                         connection.disconnect();
+                        server.current = '';
                     }
                 });
             }
@@ -73,10 +76,18 @@ client.on('message', message => {
         case 'queue':
             let queueString = '';
             let id = 1;
-            server.queue.forEach(song => {
-                queueString += id.toString() + '. ' + song + '\n';
-                id++;
-            });            
+            if (server.queue.length > 0) {
+                queueString += 'Currently playing: ' + server.current + '\n';
+                server.queue.forEach(song => {
+                    queueString += id.toString() + '. ' + song + '\n';
+                    id++;
+                });            
+            } else {
+                if (server.current == '')
+                    queueString = '- No songs on queue.\n'
+                else
+                    queueString = 'Currently playing: ' + server.current + '\n';
+            }
             message.channel.send(
                 `\`\`\`python\n${queueString}\`\`\``
             );
