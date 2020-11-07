@@ -80,26 +80,36 @@ client.on('message', message => {
                 ytdl.getBasicInfo(server.current, {}).then((err, info) => {
                     if (err) throw err;
                     queueString += 'Currently playing: ' + info.title + '\n';
+                }).then(() => {
+                    server.queue.forEach(song => {
+                        ytdl.getBasicInfo(song, {}).then((err, info) => {
+                            if (err) throw err;
+                            queueString += id.toString() + '. ' + info.title + '\n';
+                        });
+                        id++;
+                    });            
+                }).then(() => {
+                    message.channel.send(
+                        `\`\`\`python\n${queueString}\`\`\``
+                    );
                 });
-                server.queue.forEach(song => {
-                    ytdl.getBasicInfo(song, {}).then((err, info) => {
-                        if (err) throw err;
-                        queueString += id.toString() + '. ' + info.title + '\n';
-                    });
-                    id++;
-                });            
             } else {
-                if (server.current == '')
+                if (server.current == '') {
                     queueString = '- No songs on queue.\n'
-                else
+                    message.channel.send(
+                        `\`\`\`python\n${queueString}\`\`\``
+                    );
+                } else {
                     ytdl.getBasicInfo(server.current, {}).then((err, info) => {
                         if (err) throw err;
                         queueString += 'Currently playing: ' + info.title + '\n';
+                    }).then(() => {
+                        message.channel.send(
+                            `\`\`\`python\n${queueString}\`\`\``
+                        );
                     });
+                }
             }
-            message.channel.send(
-                `\`\`\`python\n${queueString}\`\`\``
-            );
             break;
     }
 });
