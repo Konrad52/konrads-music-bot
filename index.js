@@ -59,8 +59,9 @@ client.on('message', message => {
 
             server.queue.push(args[0]);
         
-            if (!message.guild.voice) {
+            if (!message.guild.voice && !message.guild.voice.channel) {
                 message.member.voice.channel.join().then((connection) => {
+                    connection.voice.setSelfDeaf(true);
                     play(connection, server);
                 });
             } else {
