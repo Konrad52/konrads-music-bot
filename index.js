@@ -77,16 +77,25 @@ client.on('message', message => {
             let queueString = '';
             let id = 1;
             if (server.queue.length > 0) {
-                queueString += 'Currently playing: ' + server.current + '\n';
+                ytdl.getBasicInfo(server.current, {}).then((err, info) => {
+                    if (err) throw err;
+                    queueString += 'Currently playing: ' + info.title + '\n';
+                });
                 server.queue.forEach(song => {
-                    queueString += id.toString() + '. ' + song + '\n';
+                    ytdl.getBasicInfo(song, {}).then((err, info) => {
+                        if (err) throw err;
+                        queueString += id.toString() + '. ' + info.title + '\n';
+                    });
                     id++;
                 });            
             } else {
                 if (server.current == '')
                     queueString = '- No songs on queue.\n'
                 else
-                    queueString = 'Currently playing: ' + server.current + '\n';
+                    ytdl.getBasicInfo(server.current, {}).then((err, info) => {
+                        if (err) throw err;
+                        queueString += 'Currently playing: ' + info.title + '\n';
+                    });
             }
             message.channel.send(
                 `\`\`\`python\n${queueString}\`\`\``
