@@ -77,39 +77,20 @@ client.on('message', message => {
             let queueString = '';
             let id = 1;
             if (server.queue.length > 0) {
-                ytdl.getBasicInfo(server.current, {}).then((err, info) => {
-                    if (err) throw err;
-                    queueString += 'Currently playing: ' + info.title + '\n';
-                }).then(() => {
-                    server.queue.forEach(song => {
-                        ytdl.getBasicInfo(song, {}).then((err, info) => {
-                            if (err) throw err;
-                            queueString += id.toString() + '. ' + info.title + '\n';
-                        });
-                        id++;
-                    });            
-                }).then(() => {
-                    message.channel.send(
-                        `\`\`\`python\n${queueString}\`\`\``
-                    );
-                });
+                queueString += 'Currently playing: ' + server.current + '\n';
+                server.queue.forEach(song => {
+                    queueString += id.toString() + '. ' + song + '\n';
+                    id++;
+                });            
             } else {
-                if (server.current == '') {
+                if (server.current == '')
                     queueString = '- No songs on queue.\n'
-                    message.channel.send(
-                        `\`\`\`python\n${queueString}\`\`\``
-                    );
-                } else {
-                    ytdl.getBasicInfo(server.current, {}).then((err, info) => {
-                        if (err) throw err;
-                        queueString += 'Currently playing: ' + info.title + '\n';
-                    }).then(() => {
-                        message.channel.send(
-                            `\`\`\`python\n${queueString}\`\`\``
-                        );
-                    });
-                }
+                else
+                    queueString = 'Currently playing: ' + server.current + '\n';
             }
+            message.channel.send(
+                `\`\`\`python\n${queueString}\`\`\``
+            );
             break;
     }
 });
