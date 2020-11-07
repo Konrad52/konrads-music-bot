@@ -73,6 +73,17 @@ client.on('message', message => {
             }
 
             break;
+
+        case 'skip':
+            if (server.dispatcher) server.dispatcher.end();
+            break;
+
+        case 'stop':
+            server.queue = [];
+            server.dispatcher.end();
+            if (message.guild.connection) message.guild.voice.connection.disconnect();
+            break;
+
         case 'queue':
             let queueString = '';
             let id = 1;
