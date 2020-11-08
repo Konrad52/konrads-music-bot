@@ -37,6 +37,7 @@ client.on('message', message => {
                 server.queue.shift();
                 server.dispatcher.on('end', () => {
                     if (server.queue[0]) {
+                        server.dispatcher = undefined;
                         play(connection, server);
                     } else {
                         connection.disconnect();
@@ -81,7 +82,7 @@ client.on('message', message => {
         case 'stop':
             server.queue = [];
             server.dispatcher.end();
-            if (message.guild.connection) message.guild.voice.connection.disconnect();
+            if (message.guild.voice && message.guild.voice.connection) message.guild.voice.connection.disconnect();
             break;
 
         case 'queue':
