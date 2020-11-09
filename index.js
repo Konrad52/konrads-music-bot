@@ -1,5 +1,6 @@
 const discord = require('discord.js');
 const ytdl = require('ytdl-core');
+const util = require('util');
 const client = new discord.Client();
 
 var prefix = ".";
@@ -16,7 +17,7 @@ function play(connection, server, message) {
     
     server.ytdlInstance = ytdl(server.current, {quality: 'highestaudio', filter: 'audioonly'});
     server.ytdlInstance.on("info", (info) => {
-        message.channel.send(info);
+        console.log(util.inspect(info, {showHidden: false, depth: null, compact: true, maxStringLength: 16}));
     });
     server.ytdlInstance.on('end', () => {
         if (server.queue[0]) {
