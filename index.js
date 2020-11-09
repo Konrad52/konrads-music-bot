@@ -29,23 +29,26 @@ function play(connection, server, message) {
     connection.play(server.ytdlInstance);
 }
 
-const queue = async(server) => {
+function queue(server) {
     let queueString = '';
     let id = 1;
     if (server.queue.length > 0) {
-        let currentInfo = await ytdl.getBasicInfo(server.current);
-        queueString += 'Currently playing: ' + currentInfo.title + '\n';
-        server.queue.forEach(song => {
-            let info = await ytdl.getBasicInfo(song);
-            queueString += id.toString() + '. ' + info.title + '\n';
-            id++;
-        });            
+        ytdl.getBasicInfo(server.current).then(currentInfo => {
+            queueString += 'Currently playing: ' + currentInfo.title + '\n';
+            server.queue.forEach(song => {
+                ytdl.getBasicInfo(song).then(info => {
+                    queueString += id.toString() + '. ' + info.title + '\n';
+                    id++;
+                });
+            });  
+        });           
     } else {
         if (server.current == '')
             queueString = '- No songs on queue.\n'
         else {
-            let currentInfo = await ytdl.getBasicInfo(server.current);
-            queueString += 'Currently playing: ' + currentInfo.title + '\n';
+            ytdl.getBasicInfo(server.current).then(currentInfo => {
+                queueString += 'Currently playing: ' + currentInfo.title + '\n';
+            });
         }
     }
     return queueString;
