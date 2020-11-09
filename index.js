@@ -29,7 +29,7 @@ function play(connection, server, message) {
     connection.play(server.ytdlInstance);
 }
 
-async function queue(server) {
+const queue = async(server) => {
     let queueString = '';
     let id = 1;
     if (server.queue.length > 0) {
