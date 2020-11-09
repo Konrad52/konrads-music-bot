@@ -29,6 +29,28 @@ function play(connection, server, message) {
     connection.play(server.ytdlInstance);
 }
 
+async function queue(server) {
+    let queueString = '';
+    let id = 1;
+    if (server.queue.length > 0) {
+        let currentInfo = await ytdl.getBasicInfo(server.current);
+        queueString += 'Currently playing: ' + currentInfo.title + '\n';
+        server.queue.forEach(song => {
+            let info = await ytdl.getBasicInfo(song);
+            queueString += id.toString() + '. ' + info.title + '\n';
+            id++;
+        });            
+    } else {
+        if (server.current == '')
+            queueString = '- No songs on queue.\n'
+        else {
+            let currentInfo = await ytdl.getBasicInfo(server.current);
+            queueString += 'Currently playing: ' + currentInfo.title + '\n';
+        }
+    }
+    return queueString;
+}
+
 client.on('message', message => {
     if (!message.content.startsWith(prefix))
         return;
@@ -93,27 +115,11 @@ client.on('message', message => {
             break;
 
         case 'queue':
-            let queueString = '';
-            let id = 1;
-            if (server.queue.length > 0) {
-                let currentInfo = await ytdl.getBasicInfo(server.current);
-                queueString += 'Currently playing: ' + currentInfo.title + '\n';
-                server.queue.forEach(song => {
-                    let info = await ytdl.getBasicInfo(song);
-                    queueString += id.toString() + '. ' + info.title + '\n';
-                    id++;
-                });            
-            } else {
-                if (server.current == '')
-                    queueString = '- No songs on queue.\n'
-                else {
-                    let currentInfo = await ytdl.getBasicInfo(server.current);
-                    queueString += 'Currently playing: ' + currentInfo.title + '\n';
-                }
-            }
-            message.channel.send(
-                `\`\`\`python\n${queueString}\`\`\``
-            );
+            queue(server).then(queueString => {
+                message.channel.send(
+                    `\`\`\`python\n${queueString}\`\`\``
+                );
+            });
             break;
     }
 });
