@@ -16,7 +16,8 @@ function play(connection, server) {
     
     server.ytdlInstance = ytdl(server.current, {quality: 'highestaudio', filter: 'audioonly'});
     server.ytdlInstance.on("info", (info) => {
-        server.current = info.title;
+        if (info.title)
+            server.current = info.title;
         console.log(info);
     });
     server.ytdlInstance.on('end', () => {
@@ -90,7 +91,8 @@ client.on('message', message => {
         case 'stop':
             server.current = '';
             server.queue = [];
-            server.ytdlInstance.end();
+            if (server.ytdlInstance)
+                server.ytdlInstance.end();
             //if (message.guild.voice && message.guild.voice.connection) message.guild.voice.connection.disconnect();
             break;
 
