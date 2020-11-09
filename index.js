@@ -1,9 +1,8 @@
 const discord = require('discord.js');
+const ytdl = require('ytdl-core');
 const client = new discord.Client();
 
-const ytdl = require('ytdl-core');
-
-const prefix = ".";
+var prefix = ".";
 
 var servers = {};
 
@@ -11,41 +10,46 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
+function play(connection, server) {
+    server.current = server.queue[0];
+    server.queue.splice(0, 1);
+    
+    server.ytdlInstance = ytdl(server.current, {quality: 'highestaudio', filter: 'audioonly'});
+    server.ytdlInstance.on("info", (info) => {
+        server.current = info.title;
+    });
+    server.ytdlInstance.on('end', () => {
+        if (server.queue[0]) {
+            play(connection, server);
+        } else {
+            connection.disconnect();
+            server.current = '';
+        }
+    });
+
+    connection.play(server.ytdlInstance);
+}
+
 client.on('message', message => {
     if (!message.content.startsWith(prefix))
         return;
+
+    if (!servers[message.guild.id]) {
+        servers[message.guild.id] = {
+            queue: [],
+            current: '',
+            ytdlInstance: null
+        }
+    }
+    const server = servers[message.guild.id];
 
     const input = message.content.substring(prefix.length);
     const split = input.split(" ");
     const command = split[0];
     const args = split.slice(1, split.length);
 
-    if (!servers[message.guild.id]) {
-        servers[message.guild.id] = {
-            queue: [],
-            current: '',
-            dispatcher: null
-        }
-    }
-    const server = servers[message.guild.id];
-
     switch (command) {
         case 'play':
-            function play(connection, server) {
-                server.dispatcher = connection.play(ytdl(server.queue[0], {quality: 'highestaudio', filter: 'audioonly'}));
-                server.current = server.queue[0];
-                server.queue.shift();
-                server.dispatcher.on('end', () => {
-                    if (server.queue[0]) {
-                        server.dispatcher = undefined;
-                        play(connection, server);
-                    } else {
-                        connection.disconnect();
-                        server.current = '';
-                    }
-                });
-            }
-
             if (!message.member.voice.channel) {
                 message.channel.send('You must be in a voice channel to use this command!');
                 return;
@@ -60,29 +64,33 @@ client.on('message', message => {
                 message.channel.send('You must ONLY specify what to play!');
                 return;
             }
-
-            server.queue.push(args[0]);
         
             if (!message.guild.voice || !message.guild.voice.channel) {
                 message.member.voice.channel.join().then((connection) => {
+                    server.queue.push(args[0]);
                     connection.voice.setSelfDeaf(true);
                     play(connection, server);
                 });
             } else {
-                message.channel.send('I\'m already in a voice channel!');
+                if (message.member.voice && message.member.voice.channelID == message.guild.voice.channelID) {
+                    server.queue.push(args[0]);
+                    message.channel.send('Song added to queue! To get the current queue type: `.queue`.');
+                } else
+                    message.channel.send('I\'m already in a voice channel!');
                 return;
             }
 
             break;
 
         case 'skip':
-            if (server.dispatcher) server.dispatcher.end();
+            if (server.ytdlInstance) server.ytdlInstance.end();
             break;
 
         case 'stop':
+            server.current = '';
             server.queue = [];
-            server.dispatcher.end();
-            if (message.guild.voice && message.guild.voice.connection) message.guild.voice.connection.disconnect();
+            server.ytdlInstance.end();
+            //if (message.guild.voice && message.guild.voice.connection) message.guild.voice.connection.disconnect();
             break;
 
         case 'queue':
