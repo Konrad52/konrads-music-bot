@@ -10,19 +10,18 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
-function play(connection, server) {
+function play(connection, server, message) {
     server.current = server.queue[0];
     server.queue.splice(0, 1);
     
     server.ytdlInstance = ytdl(server.current, {quality: 'highestaudio', filter: 'audioonly'});
     server.ytdlInstance.on("info", (info) => {
-        if (info.title)
-            server.current = info.title;
-        console.log(info);
+        message.channel.send(info.toString());
     });
     server.ytdlInstance.on('end', () => {
         if (server.queue[0]) {
-            play(connection, server);
+            server.ytdlInstance = undefined;
+            play(connection, server, message);
         } else {
             connection.disconnect();
             server.current = '';
@@ -71,7 +70,7 @@ client.on('message', message => {
                 message.member.voice.channel.join().then((connection) => {
                     server.queue.push(args[0]);
                     connection.voice.setSelfDeaf(true);
-                    play(connection, server);
+                    play(connection, server, message);
                 });
             } else {
                 if (message.member.voice && message.member.voice.channelID == message.guild.voice.channelID) {
@@ -85,7 +84,8 @@ client.on('message', message => {
             break;
 
         case 'skip':
-            if (server.ytdlInstance) server.ytdlInstance.end();
+            if (server.ytdlInstance) 
+                server.ytdlInstance.end();
             break;
 
         case 'stop':
