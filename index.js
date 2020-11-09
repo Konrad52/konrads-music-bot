@@ -16,7 +16,7 @@ function play(connection, server, message) {
     
     server.ytdlInstance = ytdl(server.current, {quality: 'highestaudio', filter: 'audioonly'});
     server.ytdlInstance.on("info", (info) => {
-        message.channel.send(info.toString());
+        message.channel.send(info);
     });
     server.ytdlInstance.on('end', () => {
         if (server.queue[0]) {
