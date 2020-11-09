@@ -118,11 +118,9 @@ client.on('message', message => {
             break;
 
         case 'queue':
-            queue(server).then(queueString => {
-                message.channel.send(
-                    `\`\`\`python\n${queueString}\`\`\``
-                );
-            });
+            message.channel.send(
+                '```python\n' + queue(server) + '```'
+            );
             break;
     }
 });
