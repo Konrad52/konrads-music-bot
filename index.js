@@ -29,7 +29,7 @@ function play(connection, server, message) {
     connection.play(server.ytdlInstance);
 }
 
-function queue(server) {
+const queue = async function(server) {
     let queueString = '';
     let id = 1;
     if (server.queue.length > 0) {
@@ -52,6 +52,10 @@ function queue(server) {
         }
     }
     return queueString;
+}
+
+function callQueue(server) {
+    return queue(server);
 }
 
 client.on('message', message => {
@@ -118,9 +122,13 @@ client.on('message', message => {
             break;
 
         case 'queue':
-            message.channel.send(
-                '```python\n' + queue(server) + '```'
-            );
+            (async() => {
+                queue(server).then((queueString) => {
+                    message.channel.send(
+                        '```python\n' + queueString + '```'
+                    );
+                });
+            })();
             break;
     }
 });
