@@ -15,9 +15,10 @@ function play(connection, server, message) {
     server.current = server.queue[0];
     server.queue.splice(0, 1);
     
-    server.ytdlInstance = ytdl(server.current, {quality: 'highestaudio', filter: 'audioonly'});
+    server.ytdlInstance = ytdl(server.current, {quality: 'highestaudio', filter: 'audioonly', highWaterMark: 1 << 25});
     server.ytdlInstance.on("info", (info) => {
-        console.log(util.inspect(info, {showHidden: false, depth: null, compact: true, maxStringLength: 16, breakLength: 128}));
+        server.current = info.title;
+        console.log(info.title);
     });
     server.ytdlInstance.on('end', () => {
         if (server.queue[0]) {
