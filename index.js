@@ -17,7 +17,7 @@ function play(connection, server, message) {
     
     server.ytdlInstance = ytdl(server.current, {quality: 'highestaudio', filter: 'audioonly'});
     server.ytdlInstance.on("info", (info) => {
-        console.log(util.inspect(info, {showHidden: false, depth: null, compact: true, maxStringLength: 16}));
+        console.log(util.inspect(info, {showHidden: false, depth: null, compact: true, maxStringLength: 16, breakLength: 512}));
     });
     server.ytdlInstance.on('end', () => {
         if (server.queue[0]) {
