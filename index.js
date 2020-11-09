@@ -16,10 +16,6 @@ function play(connection, server, message) {
     server.queue.splice(0, 1);
     
     server.ytdlInstance = ytdl(server.current, {quality: 'highestaudio', filter: 'audioonly', highWaterMark: 1 << 25});
-    server.ytdlInstance.on("info", (info) => {
-        server.current = info.title;
-        console.log(info.title);
-    });
     server.ytdlInstance.on('end', () => {
         if (server.queue[0]) {
             server.ytdlInstance = undefined;
@@ -100,16 +96,20 @@ client.on('message', message => {
             let queueString = '';
             let id = 1;
             if (server.queue.length > 0) {
-                queueString += 'Currently playing: ' + server.current + '\n';
+                let currentInfo = await ytdl.getBasicInfo(server.current);
+                queueString += 'Currently playing: ' + currentInfo.title + '\n';
                 server.queue.forEach(song => {
-                    queueString += id.toString() + '. ' + song + '\n';
+                    let info = await ytdl.getBasicInfo(song);
+                    queueString += id.toString() + '. ' + info.title + '\n';
                     id++;
                 });            
             } else {
                 if (server.current == '')
                     queueString = '- No songs on queue.\n'
-                else
-                    queueString = 'Currently playing: ' + server.current + '\n';
+                else {
+                    let currentInfo = await ytdl.getBasicInfo(server.current);
+                    queueString += 'Currently playing: ' + currentInfo.title + '\n';
+                }
             }
             message.channel.send(
                 `\`\`\`python\n${queueString}\`\`\``
